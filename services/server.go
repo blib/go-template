@@ -14,22 +14,27 @@ import (
 
 // Server configuration constants.
 const (
-	SERVER_HOST          = "server.host"
-	SERVER_PORT          = "server.port"
-	SERVER_CERT_PATH     = "server.cert"
-	SERVER_KEY_PATH      = "server.key"
-	SERVER_READ_TIMEOUT  = "server.read_timeout"
-	SERVER_WRITE_TIMEOUT = "server.write_timeout"
-	SERVER_MODE          = "server.mode"
-	TRUSTED_PROXIES      = "server.trusted_proxies"
+	serverHostKey         = "server.host"
+	serverPortKey         = "server.port"
+	serverCertPathKey     = "server.cert"
+	serverKeyPathKey      = "server.key"
+	serverReadTimeoutKey  = "server.read_timeout"
+	serverWriteTimeoutKey = "server.write_timeout"
+	serverModeKey         = "server.mode"
+	trustedProxiesKey     = "server.trusted_proxies"
 
 	// CORS configuration.
-	CORS_ALLOW_ORIGINS     = "cors.allow_origins"
-	CORS_ALLOW_METHODS     = "cors.allow_methods"
-	CORS_ALLOW_HEADERS     = "cors.allow_headers"
-	CORS_EXPOSE_HEADERS    = "cors.expose_headers"
-	CORS_ALLOW_CREDENTIALS = "cors.allow_credentials"
-	CORS_MAX_AGE           = "cors.max_age"
+	corsAllowOriginsKey     = "cors.allow_origins"
+	corsAllowMethodsKey     = "cors.allow_methods"
+	corsAllowHeadersKey     = "cors.allow_headers"
+	corsExposeHeadersKey    = "cors.expose_headers"
+	corsAllowCredentialsKey = "cors.allow_credentials" //nolint: gosec // G101 -- This is a key, not a secret.
+	corsMaxAgeKey           = "cors.max_age"
+
+	defaultServerHost     = "0.0.0.0"
+	defaultServerPort     = 8443
+	defaultServerCertPath = "cert.pem"
+	defaultServerKeyPath  = "key.pem"
 )
 
 type HTTPServer struct {
@@ -50,24 +55,24 @@ func NewHTTPServer(in InParams) *HTTPServer {
 	config := in.Config
 
 	// Set default configuration values
-	config.SetDefault(SERVER_HOST, "0.0.0.0")
-	config.SetDefault(SERVER_PORT, 8443)
-	config.SetDefault(SERVER_CERT_PATH, "cert.pem")
-	config.SetDefault(SERVER_KEY_PATH, "key.pem")
-	config.SetDefault(SERVER_READ_TIMEOUT, "15s")
-	config.SetDefault(SERVER_WRITE_TIMEOUT, "15s")
-	config.SetDefault(SERVER_MODE, "release")
+	config.SetDefault(serverHostKey, defaultServerHost)
+	config.SetDefault(serverPortKey, defaultServerPort)
+	config.SetDefault(serverCertPathKey, defaultServerCertPath)
+	config.SetDefault(serverKeyPathKey, defaultServerKeyPath)
+	config.SetDefault(serverReadTimeoutKey, "15s")
+	config.SetDefault(serverWriteTimeoutKey, "15s")
+	config.SetDefault(serverModeKey, "release")
 
 	// Set CORS defaults (configurable via environment variables or config file)
-	config.SetDefault(CORS_ALLOW_ORIGINS, []string{"*"})
-	config.SetDefault(CORS_ALLOW_METHODS, []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
-	config.SetDefault(CORS_ALLOW_HEADERS, []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-Requested-With"})
-	config.SetDefault(CORS_EXPOSE_HEADERS, []string{"Content-Length"})
-	config.SetDefault(CORS_ALLOW_CREDENTIALS, false)
-	config.SetDefault(CORS_MAX_AGE, "12h")
+	config.SetDefault(corsAllowOriginsKey, []string{"*"})
+	config.SetDefault(corsAllowMethodsKey, []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	config.SetDefault(corsAllowHeadersKey, []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-Requested-With"})
+	config.SetDefault(corsExposeHeadersKey, []string{"Content-Length"})
+	config.SetDefault(corsAllowCredentialsKey, false)
+	config.SetDefault(corsMaxAgeKey, "12h")
 
 	// Set trusted proxies defaults (configurable via environment variables or config file)
-	config.SetDefault(TRUSTED_PROXIES, []string{})
+	config.SetDefault(trustedProxiesKey, []string{})
 
 	return &HTTPServer{
 		logger: in.Logger,
@@ -77,24 +82,24 @@ func NewHTTPServer(in InParams) *HTTPServer {
 }
 
 func (s *HTTPServer) setupRouter() *gin.Engine {
-	gin.SetMode(s.config.GetString(SERVER_MODE))
+	gin.SetMode(s.config.GetString(serverModeKey))
 
 	router := gin.New()
 
-	trustedProxies := s.config.GetStringSlice(TRUSTED_PROXIES)
+	trustedProxies := s.config.GetStringSlice(trustedProxiesKey)
 	if len(trustedProxies) == 0 {
-		router.SetTrustedProxies(nil)
+		_ = router.SetTrustedProxies(nil)
 	} else {
-		router.SetTrustedProxies(trustedProxies)
+		_ = router.SetTrustedProxies(trustedProxies)
 	}
 
 	corsConfig := cors.Config{
-		AllowOrigins:     s.config.GetStringSlice(CORS_ALLOW_ORIGINS),
-		AllowMethods:     s.config.GetStringSlice(CORS_ALLOW_METHODS),
-		AllowHeaders:     s.config.GetStringSlice(CORS_ALLOW_HEADERS),
-		ExposeHeaders:    s.config.GetStringSlice(CORS_EXPOSE_HEADERS),
-		AllowCredentials: s.config.GetBool(CORS_ALLOW_CREDENTIALS),
-		MaxAge:           s.config.GetDuration(CORS_MAX_AGE),
+		AllowOrigins:     s.config.GetStringSlice(corsAllowOriginsKey),
+		AllowMethods:     s.config.GetStringSlice(corsAllowMethodsKey),
+		AllowHeaders:     s.config.GetStringSlice(corsAllowHeadersKey),
+		ExposeHeaders:    s.config.GetStringSlice(corsExposeHeadersKey),
+		AllowCredentials: s.config.GetBool(corsAllowCredentialsKey),
+		MaxAge:           s.config.GetDuration(corsMaxAgeKey),
 	}
 
 	router.Use(cors.New(corsConfig))
@@ -155,18 +160,18 @@ func (s *HTTPServer) ginLogger() gin.HandlerFunc {
 func (s *HTTPServer) Start() error {
 	router := s.setupRouter()
 
-	host := s.config.GetString(SERVER_HOST)
-	port := s.config.GetInt(SERVER_PORT)
-	certPath := s.config.GetString(SERVER_CERT_PATH)
-	keyPath := s.config.GetString(SERVER_KEY_PATH)
+	host := s.config.GetString(serverHostKey)
+	port := s.config.GetInt(serverPortKey)
+	certPath := s.config.GetString(serverCertPathKey)
+	keyPath := s.config.GetString(serverKeyPathKey)
 
 	address := fmt.Sprintf("%s:%d", host, port)
 
 	s.server = &http.Server{
 		Addr:         address,
 		Handler:      router,
-		ReadTimeout:  s.config.GetDuration(SERVER_READ_TIMEOUT),
-		WriteTimeout: s.config.GetDuration(SERVER_WRITE_TIMEOUT),
+		ReadTimeout:  s.config.GetDuration(serverReadTimeoutKey),
+		WriteTimeout: s.config.GetDuration(serverWriteTimeoutKey),
 	}
 
 	s.logger.Info("Starting HTTPS server",

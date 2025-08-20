@@ -19,8 +19,8 @@ var (
 	cfgFile *string
 	rootCmd = &cobra.Command{
 		Aliases: []string{},
-		Short:   short_description,
-		Long:    long_description,
+		Short:   shortDescription,
+		Long:    longDescription,
 	}
 )
 
@@ -30,7 +30,7 @@ func Execute(module, tag string) error {
 	parts := strings.Split(module, "/")
 	name := parts[len(parts)-1]
 	rootCmd.Use = name + " [flags] [command]"
-	return rootCmd.Execute() //nolint: wrapcheck
+	return rootCmd.Execute()
 }
 
 func init() {

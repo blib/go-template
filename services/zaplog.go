@@ -11,28 +11,28 @@ import (
 )
 
 const (
-	ENV                   = "env"
-	LOG_LEVEL             = "log_level"
-	BUGSNAG_API_KEY       = "bugsnag.api_key"
-	BUGSNAG_RELEASE_STAGE = "bugsnag.release_stage"
-	BUGSNAG_LOG_LEVEL     = "bugsnag.log_level"
+	EnvKey                 = "env"
+	LogLevelKey            = "log_level"
+	BugsnagAPIKey          = "bugsnag.api_key" //nolint: gosec // G101 -- This is a key, not a secret.
+	BugsnagReleaseStageKey = "bugsnag.release_stage"
+	BugsnagLogLevelKey     = "bugsnag.log_level"
 )
 
 func NewZapLogger(config ConfigProvider) *zap.Logger {
-	config.SetDefault(ENV, "dev")
-	config.SetDefault(LOG_LEVEL, "debug")
-	config.SetDefault(BUGSNAG_LOG_LEVEL, "info")
-	config.SetDefault(BUGSNAG_RELEASE_STAGE, "dev")
+	config.SetDefault(EnvKey, "dev")
+	config.SetDefault(LogLevelKey, "debug")
+	config.SetDefault(BugsnagLogLevelKey, "info")
+	config.SetDefault(BugsnagReleaseStageKey, "dev")
 
-	logLevel, err := zapcore.ParseLevel(config.GetString(LOG_LEVEL))
+	logLevel, err := zapcore.ParseLevel(config.GetString(LogLevelKey))
 	if err != nil {
 		logLevel = zapcore.InfoLevel
 	}
-	bugsnagLogLevel, err := zapcore.ParseLevel(config.GetString(BUGSNAG_LOG_LEVEL))
+	bugsnagLogLevel, err := zapcore.ParseLevel(config.GetString(BugsnagLogLevelKey))
 	if err != nil {
 		bugsnagLogLevel = zapcore.ErrorLevel
 	}
-	bugsnagAPIKey := config.GetString(BUGSNAG_API_KEY)
+	bugsnagAPIKey := config.GetString(BugsnagAPIKey)
 
 	console := zapcore.NewCore(
 		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
@@ -48,7 +48,7 @@ func NewZapLogger(config ConfigProvider) *zap.Logger {
 
 		bugsnag.Configure(bugsnag.Configuration{
 			APIKey:          bugsnagAPIKey,
-			ReleaseStage:    config.GetString(ENV),
+			ReleaseStage:    config.GetString(EnvKey),
 			ProjectPackages: []string{"main", moduleName},
 		})
 
@@ -63,9 +63,11 @@ func NewZapLogger(config ConfigProvider) *zap.Logger {
 
 type bugsnagCore struct {
 	zapcore.LevelEnabler
+	fields []zapcore.Field
 }
 
 func (b *bugsnagCore) With(fields []zapcore.Field) zapcore.Core {
+	b.fields = append(b.fields, fields...)
 	return b
 }
 
@@ -76,24 +78,12 @@ func (b *bugsnagCore) Check(entry zapcore.Entry, ce *zapcore.CheckedEntry) *zapc
 	return ce
 }
 
-type severity interface{}
-
-func bugsnagSeverity(lvl zapcore.Level) severity {
+func bugsnagSeverity(lvl zapcore.Level) any {
 	switch lvl {
-	case zapcore.DebugLevel:
-		return bugsnag.SeverityInfo
-	case zapcore.InfoLevel:
+	case zapcore.DebugLevel, zapcore.InfoLevel:
 		return bugsnag.SeverityInfo
 	case zapcore.WarnLevel:
 		return bugsnag.SeverityWarning
-	case zapcore.ErrorLevel:
-		return bugsnag.SeverityError
-	case zapcore.DPanicLevel:
-		return bugsnag.SeverityError
-	case zapcore.PanicLevel:
-		return bugsnag.SeverityError
-	case zapcore.FatalLevel:
-		return bugsnag.SeverityError
 	default:
 		return bugsnag.SeverityError
 	}
@@ -102,6 +92,17 @@ func bugsnagSeverity(lvl zapcore.Level) severity {
 func (b *bugsnagCore) Write(ent zapcore.Entry, fields []zapcore.Field) error {
 	passedError := errors.New(ent.Message, 1)
 	meta := bugsnag.MetaData{}
+
+	for _, f := range b.fields {
+		if f.Type == zapcore.ErrorType && f.Interface != nil {
+			meta.Add("zap", "error", f.Interface)
+			passedError = errors.New(f.Interface.(error).Error(), 1)
+		}
+
+		enc := zapcore.NewMapObjectEncoder()
+		f.AddTo(enc)
+		meta.AddStruct(f.Key, enc.Fields)
+	}
 
 	for _, f := range fields {
 		if f.Type == zapcore.ErrorType && f.Interface != nil {

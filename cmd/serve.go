@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	envFlag      = "env"
-	logLevelFlag = "log-level"
+	envFlag         = "env"
+	logLevelFlag    = "log-level"
+	shutdownTimeout = 30 * time.Second
 )
 
 func init() {
@@ -40,7 +41,7 @@ func init() {
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Start HTTPS server",
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
@@ -61,7 +62,7 @@ var serveCmd = &cobra.Command{
 						return nil
 					},
 					OnStop: func(ctx context.Context) error {
-						shutdownCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+						shutdownCtx, cancel := context.WithTimeout(ctx, shutdownTimeout)
 						defer cancel()
 						return server.Stop(shutdownCtx)
 					},

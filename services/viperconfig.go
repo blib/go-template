@@ -11,7 +11,7 @@ type viperConfigProvider struct {
 	prefix string
 }
 
-var initialized bool = false
+var initialized = false
 
 func NewConfigProvider() ConfigProvider {
 	return NewConfigProviderPrefix("")()
