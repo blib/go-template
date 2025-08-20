@@ -3,8 +3,9 @@ package app
 import (
 	"net/http"
 
-	"github.com/blib/go-template/services"
 	"github.com/gin-gonic/gin"
+
+	"github.com/blib/go-template/services"
 )
 
 func NewHealthz() services.RoutesOutParams {

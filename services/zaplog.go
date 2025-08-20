@@ -100,7 +100,7 @@ func bugsnagSeverity(lvl zapcore.Level) severity {
 }
 
 func (b *bugsnagCore) Write(ent zapcore.Entry, fields []zapcore.Field) error {
-	var passedError = errors.New(ent.Message, 1)
+	passedError := errors.New(ent.Message, 1)
 	meta := bugsnag.MetaData{}
 
 	for _, f := range fields {
@@ -120,7 +120,6 @@ func (b *bugsnagCore) Write(ent zapcore.Entry, fields []zapcore.Field) error {
 	meta.Add("zap", "timestamp", ent.Time.String())
 
 	err := bugsnag.Notify(passedError, bugsnagSeverity(ent.Level), bugsnag.ErrorClass{Name: ent.Message}, meta)
-
 	if err != nil {
 		return err
 	}

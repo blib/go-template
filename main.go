@@ -12,14 +12,15 @@ import (
 //go:embed go.mod
 var gomod []byte
 
-var BuildTime string
-var BuildHash string
-var BuildArch string
-var BuildTag string
-var BuildModule string
+var (
+	BuildTime   string
+	BuildHash   string
+	BuildArch   string
+	BuildTag    string
+	BuildModule string
+)
 
 func main() {
-
 	lines := strings.Split(string(gomod), "\n")
 	for _, l := range lines {
 		if strings.HasPrefix(l, "module ") {

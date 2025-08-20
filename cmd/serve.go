@@ -7,11 +7,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/blib/go-template/app"
-	"github.com/blib/go-template/services"
 	"github.com/spf13/cobra"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+
+	"github.com/blib/go-template/app"
+	"github.com/blib/go-template/services"
 )
 
 const (
@@ -40,7 +41,6 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Start HTTPS server",
 	Run: func(cmd *cobra.Command, _ []string) {
-
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 

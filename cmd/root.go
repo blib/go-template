@@ -29,7 +29,7 @@ func Execute(module, tag string) error {
 	rootCmd.Version = fmt.Sprintf("%s@%s", module, tag)
 	parts := strings.Split(module, "/")
 	name := parts[len(parts)-1]
-	rootCmd.Use = fmt.Sprintf("%s [flags] [command]", name)
+	rootCmd.Use = name + " [flags] [command]"
 	return rootCmd.Execute() //nolint: wrapcheck
 }
 
@@ -67,7 +67,7 @@ func initConfig() {
 func addBoolFlag(
 	flags *pflag.FlagSet,
 	name string,
-	defaultValue bool, //nolint:unparam
+	defaultValue bool,
 	help string,
 ) {
 	flags.Bool(name, defaultValue, help)

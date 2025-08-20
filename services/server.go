@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Server configuration constants
+// Server configuration constants.
 const (
 	SERVER_HOST          = "server.host"
 	SERVER_PORT          = "server.port"
@@ -23,7 +23,7 @@ const (
 	SERVER_MODE          = "server.mode"
 	TRUSTED_PROXIES      = "server.trusted_proxies"
 
-	// CORS configuration
+	// CORS configuration.
 	CORS_ALLOW_ORIGINS     = "cors.allow_origins"
 	CORS_ALLOW_METHODS     = "cors.allow_methods"
 	CORS_ALLOW_HEADERS     = "cors.allow_headers"
@@ -103,17 +103,17 @@ func (s *HTTPServer) setupRouter() *gin.Engine {
 	for _, routes := range s.routes {
 		for _, route := range routes {
 			switch route.Method {
-			case "GET":
+			case http.MethodGet:
 				router.GET(route.Path, route.Handler)
-			case "POST":
+			case http.MethodPost:
 				router.POST(route.Path, route.Handler)
-			case "PUT":
+			case http.MethodPut:
 				router.PUT(route.Path, route.Handler)
-			case "DELETE":
+			case http.MethodDelete:
 				router.DELETE(route.Path, route.Handler)
-			case "PATCH":
+			case http.MethodPatch:
 				router.PATCH(route.Path, route.Handler)
-			case "OPTIONS":
+			case http.MethodOptions:
 				router.OPTIONS(route.Path, route.Handler)
 			default:
 				panic(fmt.Sprintf("invalid method: %s for path: %s", route.Method, route.Path))
