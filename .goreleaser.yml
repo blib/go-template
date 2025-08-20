@@ -7,16 +7,9 @@ builds:
   - env:
       - CGO_ENABLED=0
     goos:
-      - darwin
       - linux
-      - windows
     goarch:
       - amd64
-archives:
-  - format_overrides:
-      - goos: windows
-        formats:
-          - zip
 dockers:
   - image_templates:
       - "ghcr.io/blib/go-template:latest"
