@@ -27,7 +27,7 @@ dockers:
 release:
   github:
     owner: blib
-    name: go-template
+    name: app
   name_template: "{{.Version}}"
   prerelease: auto
   mode: append

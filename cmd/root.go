@@ -25,8 +25,8 @@ var (
 )
 
 // Execute executes the root command.
-func Execute(module, tag string) error {
-	rootCmd.Version = fmt.Sprintf("%s@%s", module, tag)
+func Execute(module, commit string) error {
+	rootCmd.Version = fmt.Sprintf("%s@%s", module, commit)
 	parts := strings.Split(module, "/")
 	name := parts[len(parts)-1]
 	rootCmd.Use = name + " [flags] [command]"
