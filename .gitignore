@@ -1,3 +1,6 @@
+# MacOS DS_Store files
+.DS_Store
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -10,82 +13,28 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+coverage.html
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+#vendor/
 
-# Go workspace file
-go.work
-go.work.sum
+# Output of GoReleaser
+dist/
 
-# Build artifacts
-/bin/
-/build/
-/dist/
+# Visual Studio Code files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
 
-# IDE and editor files
-.vscode/
+# Local History for Visual Studio Code
+.history/
+
+# GoLand and IntelliJ IDEA files
 .idea/
-*.swp
-*.swo
-*~
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Environment variables
+# env files that usually contain secrets or local config
 .env
-.env.local
-.env.*.local
-
-# Configuration files with sensitive data
-config.local.yaml
-config.prod.yaml
-*.pem
-*.key
-*.crt
-
-# Temporary files
-tmp/
-temp/
-
-# Coverage reports
-coverage.txt
-coverage.html
-*.cover
-
-# Air live reload tool
-tmp/
-
-# Database files
-*.db
-*.sqlite
-*.sqlite3
-
-# Documentation build
-docs/_build/
-
-# Local development
-.local/
-
-# Certificates (keep generate-certs.sh but ignore generated certs)
-*.pem
-*.key
-*.crt
-certs/
-
-# Docker
-.dockerignore
-
-# Kubernetes
-*.kubeconfig
+.envrc

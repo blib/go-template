@@ -1,20 +1,34 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/blib/go-template/cmd"
 )
 
+//go:embed go.mod
+var gomod []byte
+
 var BuildTime string
 var BuildHash string
-var BuildPlatform string
+var BuildArch string
+var BuildTag string
+var BuildModule string
 
 func main() {
-	fmt.Fprintf(os.Stderr, "Backend v.%s build at %s for %s\n", BuildHash, BuildTime, BuildPlatform)
 
-	if err := cmd.Execute(); err != nil {
+	lines := strings.Split(string(gomod), "\n")
+	for _, l := range lines {
+		if strings.HasPrefix(l, "module ") {
+			BuildModule = strings.TrimPrefix(l, "module ")
+			break
+		}
+	}
+
+	if err := cmd.Execute(BuildModule, BuildTag); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		os.Exit(1)
 	}

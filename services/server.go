@@ -36,13 +36,13 @@ type HTTPServer struct {
 	server *http.Server
 	logger *zap.Logger
 	config ConfigProvider
-	routes []Routes
+	routes [][]Route
 }
 
 type InParams struct {
 	fx.In
 	Config ConfigProvider
-	Routes []Routes `group:"routes"`
+	Routes [][]Route `group:"routes"`
 	Logger *zap.Logger
 }
 
@@ -131,7 +131,6 @@ func (s *HTTPServer) ginLogger() gin.HandlerFunc {
 		path := c.Request.URL.Path
 		raw := c.Request.URL.RawQuery
 
-		// Process request
 		c.Next()
 
 		latency := time.Since(start)

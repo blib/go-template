@@ -5,19 +5,13 @@ import (
 
 	"github.com/blib/go-template/services"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/fx"
 )
 
-type outParams struct {
-	fx.Out
-	Routes services.Routes `group:"routes"`
-}
-
-func NewHealthz() outParams {
-	routes := services.Routes{
+func NewHealthz() services.RoutesOutParams {
+	routes := []services.Route{
 		{Method: "GET", Path: "/healthz", Handler: Healthz},
 	}
-	return outParams{Routes: routes}
+	return services.RoutesOutParams{Routes: routes}
 }
 
 func Healthz(c *gin.Context) {

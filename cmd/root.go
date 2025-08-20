@@ -6,13 +6,11 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
-var BuildHash = "dev"
-
 const (
-	name       = "transcript-bot"
 	debugFlag  = "debug"
 	configFlag = "config"
 )
@@ -20,15 +18,18 @@ const (
 var (
 	cfgFile *string
 	rootCmd = &cobra.Command{
-		Use:     name,
 		Aliases: []string{},
-		Version: BuildHash,
-		Short:   "Backend",
+		Short:   short_description,
+		Long:    long_description,
 	}
 )
 
 // Execute executes the root command.
-func Execute() error {
+func Execute(module, tag string) error {
+	rootCmd.Version = fmt.Sprintf("%s@%s", module, tag)
+	parts := strings.Split(module, "/")
+	name := parts[len(parts)-1]
+	rootCmd.Use = fmt.Sprintf("%s [flags] [command]", name)
 	return rootCmd.Execute() //nolint: wrapcheck
 }
 
@@ -40,7 +41,6 @@ func init() {
 }
 
 func initConfig() {
-
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 
@@ -61,5 +61,33 @@ func initConfig() {
 		fmt.Fprintf(os.Stderr, "problem reading %s: %s\n", viper.ConfigFileUsed(), err)
 	} else {
 		fmt.Fprintln(os.Stderr, "using config file:", viper.ConfigFileUsed())
+	}
+}
+
+func addBoolFlag(
+	flags *pflag.FlagSet,
+	name string,
+	defaultValue bool, //nolint:unparam
+	help string,
+) {
+	flags.Bool(name, defaultValue, help)
+	if err := viper.BindPFlag(name, flags.Lookup(name)); err != nil {
+		cobra.CheckErr(err)
+	}
+}
+
+func addStringFlag(flags *pflag.FlagSet, name string, defaultValue string, help string) {
+	flags.String(name, defaultValue, help)
+	if err := viper.BindPFlag(name, flags.Lookup(name)); err != nil {
+		cobra.CheckErr(err)
+	}
+}
+
+var _ = addStringArrayFlag
+
+func addStringArrayFlag(flags *pflag.FlagSet, name string, defaultValue []string, help string) {
+	flags.StringArray(name, defaultValue, help)
+	if err := viper.BindPFlag(name, flags.Lookup(name)); err != nil {
+		cobra.CheckErr(err)
 	}
 }

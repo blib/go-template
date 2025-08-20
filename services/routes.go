@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/fx"
 )
 
 type Route struct {
@@ -10,4 +11,7 @@ type Route struct {
 	Handler func(c *gin.Context)
 }
 
-type Routes []Route
+type RoutesOutParams struct {
+	fx.Out
+	Routes []Route `group:"routes"`
+}
