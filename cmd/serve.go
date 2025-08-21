@@ -49,7 +49,7 @@ var serveCmd = &cobra.Command{
 			fx.Provide(services.NewConfigProvider),
 			fx.Provide(services.NewZapLogger),
 			fx.Provide(services.NewHTTPServer),
-			fx.Provide(app.NewHealthz),
+			app.InitApp(),
 			fx.Invoke(func(lc fx.Lifecycle, server *services.HTTPServer, logger *zap.Logger) {
 				lc.Append(fx.Hook{
 					OnStart: func(context.Context) error {
