@@ -13,8 +13,8 @@ require (
 	github.com/bugsnag/bugsnag-go/v2 v2.6.1
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.10.1
-	github.com/spf13/cobra v1.9.1
-	github.com/spf13/pflag v1.0.7
+	github.com/spf13/cobra v1.10.0
+	github.com/spf13/pflag v1.0.8
 	github.com/spf13/viper v1.20.1
 	go.uber.org/fx v1.24.0
 	go.uber.org/zap v1.27.0
