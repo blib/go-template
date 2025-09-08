@@ -10,7 +10,7 @@ tool (
 )
 
 require (
-	github.com/bugsnag/bugsnag-go/v2 v2.6.1
+	github.com/bugsnag/bugsnag-go/v2 v2.6.2
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.10.1
 	github.com/spf13/cobra v1.9.1
